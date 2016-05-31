@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">UpdateHandler</string>
+    <string name="update_info">Update Found</string>
+</resources>
