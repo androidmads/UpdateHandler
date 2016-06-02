@@ -8,7 +8,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import androidmads.updatehandler.R;
 import androidmads.updatehandler.app.app.Config;
 
 public class Alert {
@@ -26,7 +25,7 @@ public class Alert {
     public void showDialog() {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
-        alertDialogBuilder.setTitle(activity.getString(R.string.update_info));
+        alertDialogBuilder.setTitle("Update Found");
         try {
             alertDialogBuilder.setMessage("New Version Available for "
                     + activity.getPackageManager().getApplicationLabel(
