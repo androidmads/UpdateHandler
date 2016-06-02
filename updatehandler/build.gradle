@@ -27,7 +27,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
-    compile files('libs/volley.jar')
+    compile 'com.android.volley:volley:1.0.0'
 }
 
 bintray {
@@ -37,12 +37,12 @@ bintray {
         repo = 'maven'
         name = 'androidmads.updatehandler'
 
-//        version {
-//            name = '1.0.1'
-//            desc = 'Update Checker Library'
-//            released = new Date()
-//            vcsTag = '1.0.1'
-//        }
+        version {
+            name = '1.0.1'
+            desc = 'Update Checker Library'
+            released = new Date()
+            vcsTag = '1.0.1'
+        }
 
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/androidmads/UpdateHandler.git'
