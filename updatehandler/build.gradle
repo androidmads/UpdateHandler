@@ -1,4 +1,9 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'androidmads.updatehandler' // Change this to match your package name
+version = '1.0.1' // Change this to match your version number
 
 android {
     compileSdkVersion 23
@@ -23,4 +28,45 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile files('libs/volley.jar')
+}
+
+bintray {
+    user = 'androidmads'
+    key = '34a623d0f82abd830cbffc426618b3ba64606d97'
+    pkg {
+        repo = 'maven'
+        name = 'androidmads.updatehandler'
+
+//        version {
+//            name = '1.0.1'
+//            desc = 'Update Checker Library'
+//            released = new Date()
+//            vcsTag = '1.0.1'
+//        }
+
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/androidmads/UpdateHandler.git'
+        websiteUrl = 'https://androidmads.blogspot.com'
+    }
+    configurations = ['archives']
+}
+
+task generateSourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+task generateJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task generateJavadocsJar(type: Jar) {
+    from generateJavadocs.destinationDir
+    classifier 'javadoc'
+}
+
+artifacts {
+    archives generateSourcesJar
+    archives generateJavadocsJar
 }

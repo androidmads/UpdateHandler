@@ -5,7 +5,7 @@ android {
     buildToolsVersion "24.0.0 rc4"
 
     defaultConfig {
-        applicationId "com.androidmads.demo"
+        applicationId "com.ajts.sab_2"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1

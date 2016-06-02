@@ -1,24 +1,21 @@
 package androidmads.updatehandler.app.helper;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import androidmads.updatehandler.R;
 import androidmads.updatehandler.app.app.Config;
 
-/**
- * Created by Mushtaq on 29-05-2016.
- */
 public class Alert {
 
-    Activity activity;
+    AppCompatActivity activity;
 
-    public Alert(Activity activity) {
+    public Alert(AppCompatActivity activity) {
         this.activity = activity;
     }
 

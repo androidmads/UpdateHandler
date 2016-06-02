@@ -1,6 +1,6 @@
 package androidmads.updatehandler.app;
 
-import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -21,19 +21,16 @@ import androidmads.updatehandler.app.helper.Comparator;
 import androidmads.updatehandler.app.helper.InternetDetector;
 import androidmads.updatehandler.app.manager.PrefManager;
 
-/**
- * Created by Mushtaq on 28-05-2016.
- */
 public class UpdateHandler {
 
-    Activity activity;
+    AppCompatActivity activity;
     RequestQueue queue;
     public static String TAG = UpdateHandler.class.getName();
     String[] removingUnUsefulTags;
     Alert alert;
     PrefManager prefManager;
 
-    public UpdateHandler(Activity activity) {
+    public UpdateHandler(AppCompatActivity activity) {
         this.activity = activity;
         alert = new Alert(activity);
         prefManager = new PrefManager(activity);
