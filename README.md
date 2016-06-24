@@ -3,9 +3,8 @@ Update Checker For Google Play
 
 <b>How to Import the Library:</b>
 <a href="https://bintray.com/androidmads/maven/androidmads.updatehandler/_latestVersion"></br>
-<a href="https://img.shields.io/badge/Android%20Arsenal-UpdateHandler-green.svg?style=true)](https://android-arsenal.com/details/1/3777"></br>
 <img src="https://api.bintray.com/packages/androidmads/maven/androidmads.updatehandler/images/download.svg" /></a></br>
-
+<img href="https://img.shields.io/badge/Android%20Arsenal-UpdateHandler-green.svg?style=true)](https://android-arsenal.com/details/1/3777"/></br>
 <b>Gradle:</b>
 <pre><code>compile 'androidmads.updatehandler:updatehandler:1.0.2'</code></pre>
 <b>Maven:</b>
