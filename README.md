@@ -16,12 +16,12 @@ compile 'androidmads.updatehandler:updatehandler:1.0.2'
 
 <b>Maven:</b>
 ```
-&lt;dependency&gt;
-  &lt;groupId&gt;androidmads.updatehandler&lt;/groupId&gt;
-  &lt;artifactId&gt;updatehandler&lt;/artifactId&gt;
-  &lt;version&gt;1.0.2&lt;/version&gt;
-  &lt;type&gt;pom&lt;/type&gt;
-&lt;/dependency&gt;
+<dependency>
+  <groupId>androidmads.updatehandler</groupId>
+  <artifactId>updatehandler</artifactId>
+  <version>1.0.2</version>
+  <type>pom</type>
+</dependency>
 ```
 ### How to use this Library:
 
