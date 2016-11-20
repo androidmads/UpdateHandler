@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Test</string>
+    <string name="app_name">UHLTest</string>
+    <string name="update_handler_library_sample">Update Handler Library Sample</string>
 </resources>

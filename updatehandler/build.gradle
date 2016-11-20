@@ -3,52 +3,90 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group = 'androidmads.updatehandler' // Change this to match your package name
-version = '1.0.1' // Change this to match your version number
+version = '1.0.3' // Change this to match your version number
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
     }
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+
     }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.volley:volley:1.0.0'
+    compile 'org.jsoup:jsoup:1.10.1'
+    compile 'com.android.support:appcompat-v7:24.0.0'
 }
 
+def siteUrl = 'https://github.com/androidmads/UpdateHandler'      // Homepage URL of the library
+def gitUrl = 'https://github.com/androidmads/UpdateHandler.git'   // Git URL
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                // Add your description here
+                name '<Your library description>'
+                url siteUrl
+
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'androidmads'
+                        name 'mushtaq'
+                        email 'mushtaqat3gb@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 bintray {
-    user = 'androidmads'
-    key = '34a623d0f82abd830cbffc426618b3ba64606d97'
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
     pkg {
         repo = 'maven'
         name = 'androidmads.updatehandler'
 
         version {
-            name = '1.0.1'
+            name = '1.0.3'
             desc = 'Update Checker Library'
             released = new Date()
-            vcsTag = '1.0.1'
+            vcsTag = '1.0.3'
         }
 
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/androidmads/UpdateHandler.git'
-        websiteUrl = 'https://androidmads.blogspot.com'
+        vcsUrl = gitUrl
+        websiteUrl = siteUrl
     }
-    configurations = ['archives']
 }
 
 task generateSourcesJar(type: Jar) {

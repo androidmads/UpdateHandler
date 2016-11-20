@@ -6,12 +6,14 @@ import android.util.Log;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -21,14 +23,20 @@ import androidmads.updatehandler.app.helper.Comparator;
 import androidmads.updatehandler.app.helper.InternetDetector;
 import androidmads.updatehandler.app.manager.PrefManager;
 
+import static androidmads.updatehandler.app.app.Config.PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION;
+import static androidmads.updatehandler.app.app.Config.PLAY_STORE_HTML_TAGS_TO_REMOVE_USELESS_CONTENT;
+import static androidmads.updatehandler.app.app.Config.PLAY_STORE_VARIES_W_DEVICE;
+
 public class UpdateHandler {
 
-    AppCompatActivity activity;
-    RequestQueue queue;
+    private AppCompatActivity activity;
+    private RequestQueue queue;
     public static String TAG = UpdateHandler.class.getName();
-    String[] removingUnUsefulTags;
-    Alert alert;
-    PrefManager prefManager;
+    private Alert alert;
+    private PrefManager prefManager;
+    private boolean info = true;
+    private boolean showAlert = true;
+    private UpdateListener updateListener;
 
     public UpdateHandler(AppCompatActivity activity) {
         this.activity = activity;
@@ -37,45 +45,40 @@ public class UpdateHandler {
         queue = Volley.newRequestQueue(activity);
     }
 
+    public void setOnUpdateListener(UpdateListener updateListener) {
+        this.updateListener = updateListener;
+    }
+
+    public void setCount(int count) {
+        prefManager.setPref(count);
+    }
+
+    public void setWhatsNew(boolean info) {
+        this.info = info;
+    }
+
+    public void showDefaultAlert(boolean showAlert) {
+        this.showAlert = showAlert;
+    }
+
     public void start() {
-
-        Log.v(TAG, activity.getPackageName());
-
         if (new InternetDetector(activity).isConnectingToInternet()) {
-            StringRequest request = new StringRequest(Request.Method.GET, Config.PLAY_STORE_ROOT_URL + activity.getPackageName(),
-                    new com.android.volley.Response.Listener<String>() {
+            StringRequest request = new StringRequest(
+                    Request.Method.GET,
+                    Config.PLAY_STORE_ROOT_URL + "com.billing.system",//activity.getPackageName(),//"mate.bluetoothprint",
+                    new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             try {
-                                Log.v("response", response);
-                                InputStream is = new ByteArrayInputStream(response.getBytes());
-                                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                                String line;
-                                while ((line = reader.readLine()) != null) {
-                                    if (line.contains(Config.PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION)) { // Obtain HTML line contaning version available in Play Store
-                                        String containingVersion = line.substring(line.lastIndexOf(Config.PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION) + 28);  // Get the String starting with version available + Other HTML tags
-                                        removingUnUsefulTags = containingVersion.split(Config.PLAY_STORE_HTML_TAGS_TO_REMOVE_USELESS_CONTENT); // Remove useless HTML tags
-                                        Log.v(TAG, removingUnUsefulTags[0]); // Obtain version available
-                                        if (Comparator.isVersionNewer(activity, removingUnUsefulTags[0])) {
-                                            Log.v(TAG, String.valueOf(prefManager.getCount()));
-                                            if (prefManager.getCount() == 0) {
-                                                alert.showDialog();
-                                            }
-                                            prefManager.setCount();
-                                        }
-                                        Log.v(TAG, String.valueOf(Comparator.isVersionNewer(activity, removingUnUsefulTags[0])));
-                                    } else if (line.contains(Config.PLAY_STORE_PACKAGE_NOT_PUBLISHED_IDENTIFIER)) { // This packages has not been found in Play Store
-                                        Log.v(TAG, Config.PLAY_STORE_PACKAGE_NOT_PUBLISHED_IDENTIFIER);
-                                    }
-                                }
+                                checker(response);
                             } catch (Exception e) {
-                                Log.v("Exception", e.toString());
+                                Log.v(TAG + " Exception", e.toString());
                             }
                         }
-                    }, new com.android.volley.Response.ErrorListener() {
+                    }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.v("Error", error.toString());
+                    Log.v(TAG + " Error", error.toString());
                 }
             });
             request.setRetryPolicy(new DefaultRetryPolicy(
@@ -88,8 +91,29 @@ public class UpdateHandler {
         }
     }
 
-    public void setCount(int count) {
-        prefManager.setPref(count);
+    private void checker(String response) throws IOException {
+        InputStream is = new ByteArrayInputStream(response.getBytes());
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.contains(PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION)) {
+                String containingVersion = line.substring(line.lastIndexOf(PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION) + 28);
+                String[] removingUnUsefulTags = containingVersion.split(PLAY_STORE_HTML_TAGS_TO_REMOVE_USELESS_CONTENT);
+                if (!removingUnUsefulTags[0].toUpperCase().equals(PLAY_STORE_VARIES_W_DEVICE)) {
+                    if (Comparator.isVersionNewer(activity, removingUnUsefulTags[0])) {
+                        if (prefManager.getCount() == 0) {
+                            if (showAlert)
+                                alert.showDialog(response, info, removingUnUsefulTags[0]);
+                            this.updateListener.onUpdateFound(true, alert.whatNew(response));
+                        }
+                        prefManager.setCount();
+                    }
+                }
+            } else if (line.contains(Config.PLAY_STORE_PACKAGE_NOT_PUBLISHED_IDENTIFIER)) {
+                Log.v(TAG, Config.PLAY_STORE_PACKAGE_NOT_PUBLISHED_IDENTIFIER);
+                this.updateListener.onUpdateFound(false, "");
+            }
+        }
     }
 
 }
