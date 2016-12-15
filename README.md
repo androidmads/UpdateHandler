@@ -6,6 +6,9 @@ Update Checker For Google Play
 ### Featured In
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-UpdateHandler-green.svg?style=true)](https://android-arsenal.com/details/1/3777)
 
+### Created By
+[![API](https://img.shields.io/badge/AndroidMads-AJTS-brightgreen.svg?style=flat)](https://androidmads.blogspot.in/2016/06/automatic-update-checker-for-android.html)
+
 ### How to Import the Library:
 <a href="https://bintray.com/androidmads/maven/androidmads.updatehandler/_latestVersion">
 <img src="https://api.bintray.com/packages/androidmads/maven/androidmads.updatehandler/images/download.svg" /></a>
