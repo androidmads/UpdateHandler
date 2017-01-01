@@ -65,7 +65,7 @@ public class UpdateHandler {
         if (new InternetDetector(activity).isConnectingToInternet()) {
             StringRequest request = new StringRequest(
                     Request.Method.GET,
-                    Config.PLAY_STORE_ROOT_URL + "com.billing.system",//activity.getPackageName(),//"mate.bluetoothprint",
+                    Config.PLAY_STORE_ROOT_URL + activity.getPackageName(),
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
