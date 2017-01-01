@@ -54,6 +54,14 @@ updateHandler.setOnUpdateListener(new UpdateListener() {
     }
 });
 ```
+#Demo:
+<p>Alert Without What' New</p>
+<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_o_whatsnew.png?raw=true" width = "300">
+<p>Alert With What' New</p>
+<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_whatsnew.png?raw=true" width = "300">
+<p>Update Prompt with Custom Listener</p>
+<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_custom_listener.png?raw=true" width = "300">
+
 #License:
 <pre><code>The MIT License (MIT)
 
