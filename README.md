@@ -10,9 +10,7 @@ Update Checker For Google Play
 [![API](https://img.shields.io/badge/AndroidMads-AJTS-brightgreen.svg?style=flat)](https://androidmads.blogspot.in/2016/06/automatic-update-checker-for-android.html)
 
 ### How to Import the Library:
-<a href="https://bintray.com/androidmads/maven/androidmads.updatehandler/_latestVersion">
-<img src="https://api.bintray.com/packages/androidmads/maven/androidmads.updatehandler/images/download.svg" /></a>
-<img href="https://img.shields.io/badge/Android%20Arsenal-UpdateHandler-green.svg"/>
+[![Download](https://api.bintray.com/packages/androidmads/maven/androidmads.updatehandler/images/download.svg?version=1.0.3)](https://bintray.com/androidmads/maven/androidmads.updatehandler/1.0.3/link)
 
 <b>Gradle:</b>
 ```java
