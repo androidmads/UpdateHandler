@@ -1,7 +1,7 @@
 # UpdateHandler
 Update Checker For Google Play
 
-![Image](https://2.bp.blogspot.com/-vzFWGn1sjwU/V1UJktHJqlI/AAAAAAAAAGA/Vv7kRuyf4IgVW_VNlcCmHJCWDhOYK29fwCLcB/s640/post_upadate.png)
+![Image](https://2.bp.blogspot.com/-vzFWGn1sjwU/V1UJktHJqlI/AAAAAAAAAGA/Vv7kRuyf4IgVW_VNlcCmHJCWDhOYK29fwCLcB/s1024/post_upadate.png)
 
 ### Featured In
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-UpdateHandler-green.svg?style=true)](https://android-arsenal.com/details/1/3777)
@@ -15,31 +15,44 @@ Update Checker For Google Play
 <img href="https://img.shields.io/badge/Android%20Arsenal-UpdateHandler-green.svg"/>
 
 <b>Gradle:</b>
-```
-compile 'androidmads.updatehandler:updatehandler:1.0.2'
+```java
+compile 'androidmads.updatehandler:updatehandler:1.0.3'
 ```
 
 <b>Maven:</b>
-```
+```java
 <dependency>
   <groupId>androidmads.updatehandler</groupId>
   <artifactId>updatehandler</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <type>pom</type>
 </dependency>
 ```
 ### How to use this Library:
 
 After importing this library, use the following lines to check version update for your application automatically.
-```
+```java
 /** 
 * This library works in release mode only with the same JKS key used for 
 * your Previous Version
 */
 UpdateHandler updateHandler = new UpdateHandler(MainActivity.this);
+// to start version checker
 updateHandler.start();
-// This is a code to customize the checking count and default count is 5
+// prompting intervals
 updateHandler.setCount(2);
+// to print new features added automatically
+updateHandler.setWhatsNew(true);
+// to enable or show default dialog prompt for version update
+updateHandler.showDefaultAlert(true);
+// listener for custom update prompt
+updateHandler.setOnUpdateListener(new UpdateListener() {
+    @Override
+    public void onUpdateFound(boolean newVersion, String whatsNew) {
+        Log.v("Update", String.valueOf(newVersion));
+        Log.v("Update", whatsNew);
+    }
+});
 ```
 #License:
 <pre><code>The MIT License (MIT)
