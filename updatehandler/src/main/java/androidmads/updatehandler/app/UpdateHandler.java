@@ -73,7 +73,7 @@ public class UpdateHandler {
                                 try {
                                     checker(response);
                                 } catch (Exception e) {
-                                    updateListener.onUpdateFound(false, "");
+                                    updateListener.onUpdateFound(false, "No Update");
                                 }
                             }
                         }, new Response.ErrorListener() {
