@@ -6,14 +6,12 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import androidmads.updatehandler.app.app.Config;
 
-import static androidmads.updatehandler.app.UpdateHandler.TAG;
 import static androidmads.updatehandler.app.app.Config.PLAY_STORE_HTML_TAGS_TO_DIV_WHATS_NEW_END;
 import static androidmads.updatehandler.app.app.Config.PLAY_STORE_HTML_TAGS_TO_DIV_WHATS_NEW_START;
 import static androidmads.updatehandler.app.app.Config.PLAY_STORE_WHATS_NEW;
@@ -58,8 +56,7 @@ public class Alert {
         AlertDialog alertDialog = alertDialogBuilder.create();
         try {
             alertDialog.show();
-        } catch (Exception e) {
-            Log.v(TAG, e.toString());
+        } catch (Exception ignored) {
         }
 
     }

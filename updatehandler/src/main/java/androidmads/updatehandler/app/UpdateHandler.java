@@ -62,32 +62,36 @@ public class UpdateHandler {
     }
 
     public void start() {
-        if (new InternetDetector(activity).isConnectingToInternet()) {
-            StringRequest request = new StringRequest(
-                    Request.Method.GET,
-                    Config.PLAY_STORE_ROOT_URL + activity.getPackageName(),
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                checker(response);
-                            } catch (Exception e) {
-                                Log.v(TAG + " Exception", e.toString());
+        try {
+            if (new InternetDetector(activity).isConnectingToInternet()) {
+                StringRequest request = new StringRequest(
+                        Request.Method.GET,
+                        Config.PLAY_STORE_ROOT_URL + activity.getPackageName(),
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    checker(response);
+                                } catch (Exception e) {
+                                    updateListener.onUpdateFound(false, "");
+                                }
                             }
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.v(TAG + " Error", error.toString());
-                }
-            });
-            request.setRetryPolicy(new DefaultRetryPolicy(
-                    50000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            queue.add(request);
-        } else {
-            Log.v(TAG, "Connection Error");
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        updateListener.onUpdateFound(false, "");
+                    }
+                });
+                request.setRetryPolicy(new DefaultRetryPolicy(
+                        50000,
+                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                queue.add(request);
+            } else {
+                updateListener.onUpdateFound(false, "");
+            }
+        } catch (Exception e) {
+            updateListener.onUpdateFound(false, "");
         }
     }
 
