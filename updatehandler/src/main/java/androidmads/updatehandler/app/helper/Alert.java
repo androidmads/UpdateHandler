@@ -75,7 +75,13 @@ public class Alert {
     }
 
     private void goToMarket() {
-        activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Config.ROOT_PLAY_STORE_DEVICE + activity.getPackageName())));
+        try {
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Config.ROOT_PLAY_STORE_DEVICE
+                    + activity.getPackageName())));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Config.PLAY_STORE_ROOT_URL
+                    + activity.getPackageName())));
+        }
     }
 
 }
