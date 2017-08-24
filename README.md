@@ -14,7 +14,7 @@ Update Checker For Google Play
 
 <b>Gradle:</b>
 ```java
-compile 'androidmads.updatehandler:updatehandler:1.0.3'
+compile 'androidmads.updatehandler:updatehandler:1.0.4'
 ```
 
 <b>Maven:</b>
@@ -22,7 +22,7 @@ compile 'androidmads.updatehandler:updatehandler:1.0.3'
 <dependency>
   <groupId>androidmads.updatehandler</groupId>
   <artifactId>updatehandler</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <type>pom</type>
 </dependency>
 ```
