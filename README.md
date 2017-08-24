@@ -63,7 +63,7 @@ new UpdateHandler.Builder(this)
 	})
 	.build();
 ```
-#Demo:
+# Demo:
 <p>Alert Without What' New</p>
 <img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_o_whatsnew.png?raw=true" width = "300">
 <p>Alert With What' New</p>
