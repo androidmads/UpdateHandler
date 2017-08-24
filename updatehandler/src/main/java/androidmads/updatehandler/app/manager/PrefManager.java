@@ -5,11 +5,12 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-import androidmads.updatehandler.app.app.Config;
-
 @SuppressLint("CommitPrefEdits")
 public class PrefManager {
 
+    public static final String KEY_COUNT = "count";
+    public static final String KEY_PREF = "pref";
+    
     private SharedPreferences pref;
     private Editor editor;
 
@@ -20,29 +21,29 @@ public class PrefManager {
 
     public void setCount() {
         editor = pref.edit();
-        editor.putInt(Config.KEY_COUNT, getCount() + 1);
+        editor.putInt(KEY_COUNT, getCount() + 1);
         editor.apply();
     }
 
     public int getCount() {
-        if (pref.getInt(Config.KEY_COUNT, 0) >= getPref()) {
+        if (pref.getInt(KEY_COUNT, 0) >= getPref()) {
             editor = pref.edit();
-            editor.putInt(Config.KEY_COUNT, 0);
+            editor.putInt(KEY_COUNT, 0);
             editor.apply();
             return 0;
         } else {
-            return pref.getInt(Config.KEY_COUNT, 0);
+            return pref.getInt(KEY_COUNT, 0);
         }
     }
 
     public void setPref(int count) {
         editor = pref.edit();
-        editor.putInt(Config.KEY_PREF, count);
+        editor.putInt(KEY_PREF, count);
         editor.apply();
     }
 
     private int getPref() {
-        return pref.getInt(Config.KEY_PREF, 5);
+        return pref.getInt(KEY_PREF, 5);
     }
 
 }

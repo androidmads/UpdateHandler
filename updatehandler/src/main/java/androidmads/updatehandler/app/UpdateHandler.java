@@ -1,122 +1,347 @@
 package androidmads.updatehandler.app;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import org.jsoup.Jsoup;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
-import androidmads.updatehandler.app.app.Config;
 import androidmads.updatehandler.app.helper.Alert;
-import androidmads.updatehandler.app.helper.Comparator;
-import androidmads.updatehandler.app.helper.InternetDetector;
 import androidmads.updatehandler.app.manager.PrefManager;
-
-import static androidmads.updatehandler.app.app.Config.PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION;
-import static androidmads.updatehandler.app.app.Config.PLAY_STORE_HTML_TAGS_TO_REMOVE_USELESS_CONTENT;
-import static androidmads.updatehandler.app.app.Config.PLAY_STORE_VARIES_W_DEVICE;
 
 public class UpdateHandler {
 
     private AppCompatActivity activity;
-    private RequestQueue queue;
-    public static String TAG = UpdateHandler.class.getName();
     private Alert alert;
     private PrefManager prefManager;
-    private boolean info = true;
-    private boolean showAlert = true;
-    private UpdateListener updateListener;
+    private Builder builder;
 
-    public UpdateHandler(AppCompatActivity activity) {
+    private UpdateHandler(AppCompatActivity activity, Builder builder) {
         this.activity = activity;
-        alert = new Alert(activity);
-        prefManager = new PrefManager(activity);
-        queue = Volley.newRequestQueue(activity);
+        this.alert = new Alert(activity);
+        this.prefManager = new PrefManager(activity);
+        this.builder = builder;
+        start();
     }
 
-    public void setOnUpdateListener(UpdateListener updateListener) {
-        this.updateListener = updateListener;
-    }
+    public String start = "";
 
-    public void setCount(int count) {
-        prefManager.setPref(count);
-    }
-
-    public void setWhatsNew(boolean info) {
-        this.info = info;
-    }
-
-    public void showDefaultAlert(boolean showAlert) {
-        this.showAlert = showAlert;
-    }
-
-    public void start() {
+    private void start() {
         try {
-            if (new InternetDetector(activity).isConnectingToInternet()) {
-                StringRequest request = new StringRequest(
-                        Request.Method.GET,
-                        Config.PLAY_STORE_ROOT_URL + activity.getPackageName(),
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                try {
-                                    checker(response);
-                                } catch (Exception e) {
-                                    updateListener.onUpdateFound(false, "No Update");
-                                }
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        updateListener.onUpdateFound(false, "");
-                    }
-                });
-                request.setRetryPolicy(new DefaultRetryPolicy(
-                        50000,
-                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                queue.add(request);
-            } else {
-                updateListener.onUpdateFound(false, "");
+            if (prefManager.getCount() == 0) {
+                if (!isNetworkAvailable()) {
+                    if (builder.updateListener != null)
+                        builder.updateListener.onUpdateFound(false, "No Internet Connection");
+                }
+                if (IsNewVersionAvailable(activity)) {
+                    start = whatNew(activity.getPackageName());
+                    builder.updateListener.onUpdateFound(true, start);
+                    if (!builder.showAlert)
+                        return;
+                    alert.showDialog(builder,
+                            start,
+                            getMarketVersion(activity));
+                } else {
+                    builder.updateListener.onUpdateFound(false, "No Update");
+                }
             }
+            prefManager.setCount();
         } catch (Exception e) {
-            updateListener.onUpdateFound(false, "");
+            builder.updateListener.onUpdateFound(false, e.getMessage());
         }
     }
 
-    private void checker(String response) throws IOException {
-        InputStream is = new ByteArrayInputStream(response.getBytes());
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains(PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION)) {
-                String containingVersion = line.substring(line.lastIndexOf(PLAY_STORE_HTML_TAGS_TO_GET_RIGHT_POSITION) + 28);
-                String[] removingUnUsefulTags = containingVersion.split(PLAY_STORE_HTML_TAGS_TO_REMOVE_USELESS_CONTENT);
-                if (!removingUnUsefulTags[0].toUpperCase().equals(PLAY_STORE_VARIES_W_DEVICE)) {
-                    if (Comparator.isVersionNewer(activity, removingUnUsefulTags[0])) {
-                        if (prefManager.getCount() == 0) {
-                            if (showAlert)
-                                alert.showDialog(response, info, removingUnUsefulTags[0]);
-                            this.updateListener.onUpdateFound(true, alert.whatNew(response));
-                        }
-                        prefManager.setCount();
-                    }
+    // Check Version Availability
+
+    private boolean IsNewVersionAvailable(AppCompatActivity appCompatActivity) {
+        try {
+            if (isNetworkAvailable()) {
+                CheckUrlExists checkUrlExists = new CheckUrlExists(appCompatActivity);
+                boolean result = checkUrlExists.execute().get();
+                if (result) {
+                    String AppVersion = getInstalledAppVersion(appCompatActivity);
+                    String MarketVersion = getMarketVersion(appCompatActivity);
+                    return versionCompare(MarketVersion, AppVersion);
                 }
-            } else if (line.contains(Config.PLAY_STORE_PACKAGE_NOT_PUBLISHED_IDENTIFIER)) {
-                Log.v(TAG, Config.PLAY_STORE_PACKAGE_NOT_PUBLISHED_IDENTIFIER);
-                this.updateListener.onUpdateFound(false, "");
             }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
+    private boolean versionCompare(String NewVersion, String OldVersion) {
+        String[] vals1 = NewVersion.split("\\.");
+        String[] vals2 = OldVersion.split("\\.");
+        int i = 0;
+        // set index to first non-equal ordinal or length of shortest version string
+        while (i < vals1.length && i < vals2.length && vals1[i].equals(vals2[i])) {
+            i++;
+        }
+        // compare first non-equal ordinal number
+        if (i < vals1.length && i < vals2.length) {
+            int diff = Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i]));
+            return Integer.signum(diff) > 0;
+        }
+        // the strings are equal or one string is a substring of the other
+        // e.g. "1.2.3" = "1.2.3" or "1.2.3" < "1.2.3.4"
+        return Integer.signum(vals1.length - vals2.length) > 0;
+    }
+
+    private String getMarketVersion(AppCompatActivity appCompatActivity) {
+        try {
+            return new MarketInfo(appCompatActivity.getPackageName(), "softwareVersion").execute().get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
+
+    private String getInstalledAppVersion(AppCompatActivity appCompatActivity) {
+        try {
+            return new AppInfo(appCompatActivity).execute().get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    private String whatNew(String packageName) {
+        String whatsNew = null;
+        try {
+            whatsNew = new whatsNew(packageName, "div[class=recent-change]").execute().get();
+            whatsNew = whatsNew.replaceAll("[\r\n]+", "\n-");
+            whatsNew = whatsNew.substring(0, whatsNew.length());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return whatsNew;
+    }
+
+    // Check Url Existence
+    private class CheckUrlExists extends AsyncTask<Void, Void, Boolean> {
+
+        AppCompatActivity appCompatActivity;
+        boolean IsUrlExist = false;
+
+        CheckUrlExists(AppCompatActivity compatActivity) {
+            appCompatActivity = compatActivity;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                URL url = new URL("https://play.google.com/store/apps/details?id=" + appCompatActivity.getPackageName());
+                HttpURLConnection huc = (HttpURLConnection) url.openConnection();
+                huc.setRequestMethod("GET");
+                huc.connect();
+                IsUrlExist = isNetworkAvailable() && huc.getResponseCode() == 200;
+            } catch (Exception e) {
+                IsUrlExist = false;
+            }
+            return IsUrlExist;
+        }
+    }
+
+    // Check App's Market Version Details
+    private class MarketInfo extends AsyncTask<Void, Object, String> {
+        String MarketVersion = "";
+        String PackageName = "";
+        String ItemType = "";
+
+        MarketInfo(String PackageName, String ItemType) {
+            this.PackageName = PackageName;
+            this.ItemType = ItemType;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                return Jsoup.connect("https://play.google.com/store/apps/details?id=" + PackageName)
+                        .timeout(60000)
+                        .ignoreHttpErrors(true)
+                        .referrer("http://www.google.com")
+                        .get()
+                        .select("div[itemprop=" + ItemType + "]")
+                        .first() // .recent-change
+                        .ownText();
+            } catch (Exception ignored) {
+
+            }
+            return MarketVersion;
+        }
+    }
+
+    // Check App's Version Details
+    private class AppInfo extends AsyncTask<Void, Object, String> {
+        String AppVersion = "";
+        AppCompatActivity appCompatActivity;
+
+        AppInfo(AppCompatActivity compatActivity) {
+            appCompatActivity = compatActivity;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                return AppVersion = appCompatActivity.getPackageManager().getPackageInfo(appCompatActivity.getPackageName(), 0).versionName + "";
+            } catch (Exception ignored) {
+
+            }
+            return AppVersion;
+        }
+
+    }
+
+    // Check for What's New
+    private class whatsNew extends AsyncTask<Void, Object, String> {
+        String PackageName = "";
+        String ItemType = "";
+
+        whatsNew(String PackageName, String ItemType) {
+            this.PackageName = PackageName;
+            this.ItemType = ItemType;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                return Jsoup.connect("https://play.google.com/store/apps/details?id=" + PackageName)
+                        .timeout(60000)
+                        .ignoreHttpErrors(true)
+                        .referrer("http://www.google.com")
+                        .get()
+                        .select(ItemType)
+                        .first().ownText();
+
+            } catch (Exception e) {
+                Log.v("ItemType", e.getMessage() + " 123");
+                e.printStackTrace();
+            }
+            return "";
+        }
+    }
+
+    // Check Internet Connection
+    @SuppressWarnings("deprecation")
+    private boolean isNetworkAvailable() {
+        boolean status = false;
+        try {
+            ConnectivityManager cm = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getNetworkInfo(0);
+
+            if (netInfo != null
+                    && netInfo.getState() == NetworkInfo.State.CONNECTED) {
+                status = true;
+            } else {
+                netInfo = cm.getNetworkInfo(1);
+                if (netInfo != null
+                        && netInfo.getState() == NetworkInfo.State.CONNECTED)
+                    status = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return status;
+    }
+
+    public static class Builder {
+
+        AppCompatActivity appCompatActivity;
+        public String title = "Update Found";
+        public boolean showWhatsNew = false;
+        public String update = "Update";
+        public String cancel = "Cancel";
+        public String updateContent = "New Version ([VERSION]) Available for [APP_NAME]";
+        public boolean showAlert = true;
+        public boolean cancelable = true;
+        public UpdateClickListener updateClickLister = null;
+        public UpdateCancelListener updateCancelListener = null;
+        public UpdateListener updateListener = null;
+        PrefManager prefManager;
+
+        public interface UpdateListener {
+            void onUpdateFound(boolean newVersion, String whatsNew);
+        }
+
+        public interface UpdateClickListener {
+            void onUpdateClick(boolean newVersion, String whatsNew);
+        }
+
+        public interface UpdateCancelListener {
+            void onCancelClick();
+        }
+
+        public Builder(AppCompatActivity appCompatActivity) {
+            this.appCompatActivity = appCompatActivity;
+            prefManager = new PrefManager(appCompatActivity);
+        }
+
+        public Builder setTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder showWhatsNew(boolean showWhatsNew) {
+            this.showWhatsNew = showWhatsNew;
+            return this;
+        }
+
+        public Builder showDefaultAlert(boolean showAlert) {
+            this.showAlert = showAlert;
+            return this;
+        }
+
+        public Builder setUpdateText(String update) {
+            this.update = update;
+            return this;
+        }
+
+        public Builder setCancelText(String cancel) {
+            this.cancel = cancel;
+            return this;
+        }
+
+        public Builder setContent(String updateContent) {
+            this.updateContent = updateContent;
+            return this;
+        }
+
+        public Builder setCheckerCount(int count) {
+            this.prefManager.setPref(count);
+            return this;
+        }
+
+        public Builder setCancelable(boolean cancelable) {
+            this.cancelable = cancelable;
+            return this;
+        }
+
+        public Builder setOnUpdateClickLister(UpdateClickListener updateClickLister) {
+            this.updateClickLister = updateClickLister;
+            return this;
+        }
+
+        public Builder setOnCancelClickLister(UpdateCancelListener updateCancelListener) {
+            this.updateCancelListener = updateCancelListener;
+            return this;
+        }
+
+        public Builder setOnUpdateFoundLister(UpdateListener updateLister) {
+            this.updateListener = updateLister;
+            return this;
+        }
+
+        public UpdateHandler build() {
+            return new UpdateHandler(appCompatActivity, this);
         }
     }
 

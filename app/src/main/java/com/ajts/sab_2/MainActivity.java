@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.TextView;
 
 import androidmads.updatehandler.app.UpdateHandler;
-import androidmads.updatehandler.app.UpdateListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,25 +18,34 @@ public class MainActivity extends AppCompatActivity {
 
         tv = (TextView) findViewById(R.id.uhlPrompt);
 
-        // this library works in release mode only with the same JKS key used for your Previous Version
-        UpdateHandler updateHandler = new UpdateHandler(MainActivity.this);
-        // to start version checker
-        updateHandler.start();
-        // prompting intervals
-        updateHandler.setCount(2);
-        // to print new features added automatically
-        updateHandler.setWhatsNew(true);
-        // to enable or show default dialog prompt for version update
-        updateHandler.showDefaultAlert(true);
-        // listener for custom update prompt
-        updateHandler.setOnUpdateListener(new UpdateListener() {
-            @Override
-            public void onUpdateFound(boolean newVersion, String whatsNew) {
-                Log.v("Update", String.valueOf(newVersion));
-                Log.v("Update", whatsNew);
-                tv.setText(tv.getText() + "\n\nUpdate Found : " + newVersion + "\n\nWhat's New\n" + whatsNew);
-            }
-        });
+        new UpdateHandler.Builder(this)
+                .setTitle("Update Found")
+                .setContent("New Version Found")
+                .setUpdateText("Yes")
+                .setCancelText("No")
+                .showDefaultAlert(true)
+                .showWhatsNew(false)
+                .setCheckerCount(2)
+                .setOnUpdateFoundLister(new UpdateHandler.Builder.UpdateListener() {
+                    @Override
+                    public void onUpdateFound(boolean newVersion, String whatsNew) {
+                        tv.setText(tv.getText() + "\n\nUpdate Found : " + newVersion + "\n\nWhat's New\n" + whatsNew);
+                    }
+                })
+                .setOnUpdateClickLister(new UpdateHandler.Builder.UpdateClickListener() {
+                    @Override
+                    public void onUpdateClick(boolean newVersion, String whatsNew) {
+                        Log.v("onUpdateClick", String.valueOf(newVersion));
+                        Log.v("onUpdateClick", whatsNew);
+                    }
+                })
+                .setOnCancelClickLister(new UpdateHandler.Builder.UpdateCancelListener() {
+                    @Override
+                    public void onCancelClick() {
+                        Log.v("onCancelClick", "Cancelled");
+                    }
+                })
+                .build();
 
     }
 }
