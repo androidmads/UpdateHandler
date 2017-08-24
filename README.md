@@ -10,19 +10,19 @@ Update Checker For Google Play
 [![API](https://img.shields.io/badge/AndroidMads-AJTS-brightgreen.svg?style=flat)](https://androidmads.blogspot.in/2016/06/automatic-update-checker-for-android.html)
 
 ### How to Import the Library:
-[![Download](https://api.bintray.com/packages/androidmads/maven/androidmads.updatehandler/images/download.svg?version=1.0.3)](https://bintray.com/androidmads/maven/androidmads.updatehandler/1.0.3/link)
+[![Download](https://api.bintray.com/packages/androidmads/maven/androidmads.updatehandler/images/download.svg?version=1.0.5)](https://bintray.com/androidmads/maven/androidmads.updatehandler/1.0.3/link)
 
 <b>Gradle:</b>
-```java
-compile 'androidmads.updatehandler:updatehandler:1.0.4'
+```groovy
+compile 'androidmads.updatehandler:updatehandler:1.0.5'
 ```
 
 <b>Maven:</b>
-```java
+```groovy
 <dependency>
   <groupId>androidmads.updatehandler</groupId>
   <artifactId>updatehandler</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <type>pom</type>
 </dependency>
 ```
@@ -34,23 +34,34 @@ After importing this library, use the following lines to check version update fo
 * This library works in release mode only with the same JKS key used for 
 * your Previous Version
 */
-UpdateHandler updateHandler = new UpdateHandler(MainActivity.this);
-// to start version checker
-updateHandler.start();
-// prompting intervals
-updateHandler.setCount(2);
-// to print new features added automatically
-updateHandler.setWhatsNew(true);
-// to enable or show default dialog prompt for version update
-updateHandler.showDefaultAlert(true);
-// listener for custom update prompt
-updateHandler.setOnUpdateListener(new UpdateListener() {
-    @Override
-    public void onUpdateFound(boolean newVersion, String whatsNew) {
-        Log.v("Update", String.valueOf(newVersion));
-        Log.v("Update", whatsNew);
-    }
-});
+new UpdateHandler.Builder(this)
+	.setContent("New Version Found")
+	.setTitle("Update Found")
+	.setUpdateText("Yes")
+	.setCancelText("No")
+	.showDefaultAlert(true)
+	.showWhatsNew(true)
+	.setCheckerCount(2)
+	.setOnUpdateFoundLister(new UpdateHandler.Builder.UpdateListener() {
+		@Override
+		public void onUpdateFound(boolean newVersion, String whatsNew) {
+			tv.setText(tv.getText() + "\n\nUpdate Found : " + newVersion + "\n\nWhat's New\n" + whatsNew);
+		}
+	})
+	.setOnUpdateClickLister(new UpdateHandler.Builder.UpdateClickListener() {
+		@Override
+		public void onUpdateClick(boolean newVersion, String whatsNew) {
+			Log.v("onUpdateClick", String.valueOf(newVersion));
+			Log.v("onUpdateClick", whatsNew);
+		}
+	})
+	.setOnCancelClickLister(new UpdateHandler.Builder.UpdateCancelListener() {
+		@Override
+		public void onCancelClick() {
+			Log.v("onCancelClick", "Cancelled");
+		}
+	})
+	.build();
 ```
 #Demo:
 <p>Alert Without What' New</p>
@@ -63,7 +74,7 @@ updateHandler.setOnUpdateListener(new UpdateListener() {
 #License:
 <pre><code>The MIT License (MIT)
 
-Copyright (c) 2016 AndroidMad
+Copyright (c) 2017 AndroidMad
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
