@@ -1,7 +1,7 @@
 # UpdateHandler
 Update Checker For Google Play
 
-![Image](https://2.bp.blogspot.com/-vzFWGn1sjwU/V1UJktHJqlI/AAAAAAAAAGA/Vv7kRuyf4IgVW_VNlcCmHJCWDhOYK29fwCLcB/s1024/post_upadate.png)
+<!--![Image](https://2.bp.blogspot.com/-vzFWGn1sjwU/V1UJktHJqlI/AAAAAAAAAGA/Vv7kRuyf4IgVW_VNlcCmHJCWDhOYK29fwCLcB/s1024/post_upadate.png)-->
 
 ### Featured In
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-UpdateHandler-green.svg?style=true)](https://android-arsenal.com/details/1/3777)
@@ -64,12 +64,34 @@ new UpdateHandler.Builder(this)
 	.build();
 ```
 # Demo:
-<p>Alert Without What' New</p>
-<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_o_whatsnew.png?raw=true" width = "300">
-<p>Alert With What' New</p>
-<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_whatsnew.png?raw=true" width = "300">
-<p>Update Prompt with Custom Listener</p>
-<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_custom_listener.png?raw=true" width = "300">
+<table border="0">
+  <tr>
+    <td>
+    	<div>
+	<center>
+	<p>Alert Without What' New</p>
+	<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_o_whatsnew.png?raw=true" width = "250">
+	</center>
+	</div>
+    </td>    
+    <td>
+    	<div>
+	<center>
+	<p>Alert With What' New</p>
+	<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_whatsnew.png?raw=true" width = "250">
+	</center>
+	</div>
+    </td> 
+    <td>
+    	<div>
+	<center>
+	<p>Update Prompt with Custom Listener</p>
+	<img src = "https://github.com/androidmads/UpdateHandler/blob/master/w_custom_listener.png?raw=true" width = "250">
+	</center>
+	</div>
+    </td>
+  </tr>
+</table>
 
 #License:
 <pre><code>The MIT License (MIT)
